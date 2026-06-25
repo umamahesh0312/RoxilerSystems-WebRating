@@ -1,37 +1,22 @@
 import apiClient from './apiClient';
 import { User, ChangePasswordFormData } from '@/types';
+import { mapUser, BackendApiResponse } from './authService';
 
 class UserService {
   async getUserProfile(): Promise<User> {
-    try {
-      // Mock API call
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.get<User>('/users/profile');
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    // Backend doesn't have a dedicated profile endpoint; use the auth context
+    throw new Error('Profile not available');
   }
 
   async updateProfile(data: Partial<User>): Promise<User> {
-    try {
-      // Mock API call
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.put<User>('/users/profile', data);
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    throw new Error('Profile update endpoint not available');
   }
 
   async changePassword(data: ChangePasswordFormData): Promise<void> {
-    try {
-      // Mock API call
-      // Real API call (uncomment when backend is ready):
-      // await apiClient.post('/users/change-password', data);
-    } catch (error) {
-      throw error;
-    }
+    await apiClient.put('/auth/change-password', {
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+    });
   }
 }
 

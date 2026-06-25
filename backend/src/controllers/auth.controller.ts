@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from '@services/index';
 import { ResponseHandler, logger } from '@utils/index';
-import { RegisterDTO, LoginDTO, ChangePasswordDTO } from '@types/dto';
+import {
+  RegisterDTO,
+  LoginDTO,
+  ChangePasswordDTO
+} from '../types/dto';
 
 export class AuthController {
   async register(req: Request, res: Response, next: NextFunction) {

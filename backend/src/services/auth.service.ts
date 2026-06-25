@@ -1,7 +1,7 @@
 import { userRepository } from '@repositories/index';
 import { JwtUtils, PasswordUtils, logger } from '@utils/index';
-import { IUser, UserRole } from '@types/index';
-import { RegisterDTO, LoginDTO } from '@types/dto';
+import { IUser, UserRole } from '../types';
+import { RegisterDTO, LoginDTO } from '../types/dto';
 
 export class AuthService {
   async register(data: RegisterDTO): Promise<{ token: string; user: IUser }> {

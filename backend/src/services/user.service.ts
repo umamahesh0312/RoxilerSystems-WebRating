@@ -1,7 +1,7 @@
 import { userRepository } from '@repositories/index';
 import { PasswordUtils, logger } from '@utils/index';
-import { IUser } from '@types/index';
-import { CreateUserDTO, UpdateUserDTO, UserFilterDTO } from '@types/dto';
+import { IUser } from '../types';
+import { CreateUserDTO, UpdateUserDTO, UserFilterDTO } from '../types/dto';
 
 export class UserService {
   async createUser(data: CreateUserDTO): Promise<IUser> {

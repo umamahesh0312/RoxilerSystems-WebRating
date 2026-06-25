@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { IApiResponse, IPaginatedResponse } from '@types/index';
+import { IApiResponse, IPaginatedResponse } from '../types';
 
 export class ResponseHandler {
   static success<T>(res: Response, data: T, message: string = 'Success', statusCode: number = 200) {

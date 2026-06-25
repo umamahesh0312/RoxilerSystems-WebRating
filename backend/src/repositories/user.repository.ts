@@ -1,5 +1,5 @@
 import prisma from '@config/database';
-import { IUser } from '@types/index';
+import { IUser } from '../types';
 import { Prisma } from '@prisma/client';
 
 export class UserRepository {

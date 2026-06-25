@@ -1,98 +1,77 @@
 import apiClient from './apiClient';
-import { User, FilterOptions, PaginatedResponse, AddUserFormData } from '@/types';
-import { MOCK_USERS } from '@/constants/mockData';
+import { User, FilterOptions, PaginatedResponse, AddUserFormData, Store } from '@/types';
+import { mapUser, mapStore, BackendApiResponse, BackendPaginatedResponse } from './authService';
 
 class AdminService {
   async getUsers(filters?: FilterOptions): Promise<PaginatedResponse<User>> {
-    try {
-      // Mock API call
-      const filteredUsers = MOCK_USERS.filter(user => {
-        if (filters?.search) {
-          const search = filters.search.toLowerCase();
-          return (
-            user.name.toLowerCase().includes(search) ||
-            user.email.toLowerCase().includes(search)
-          );
-        }
-        return true;
-      });
-
-      const page = filters?.page || 1;
-      const pageSize = filters?.pageSize || 10;
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-
-      return {
-        data: filteredUsers.slice(start, end),
-        total: filteredUsers.length,
-        page,
-        pageSize,
-        totalPages: Math.ceil(filteredUsers.length / pageSize),
-      };
-
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.get<PaginatedResponse<User>>('/admin/users', {
-      //   params: filters,
-      // });
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get<BackendPaginatedResponse<any>>('/admin/users', {
+      params: filters,
+    });
+    const { data, pagination } = response.data;
+    return {
+      data: data.map(mapUser),
+      total: pagination.total,
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+    };
   }
 
   async getUserById(id: string): Promise<User> {
-    try {
-      // Mock API call
-      const user = MOCK_USERS.find(u => u.id === id);
-      if (!user) throw new Error('User not found');
-      return user;
-
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.get<User>(`/admin/users/${id}`);
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get<BackendApiResponse<any>>(`/admin/users/${id}`);
+    return mapUser(response.data.data);
   }
 
   async addUser(data: AddUserFormData): Promise<User> {
-    try {
-      // Mock API call
-      const newUser: User = {
-        id: String(MOCK_USERS.length + 1),
-        ...data,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      return newUser;
-
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.post<User>('/admin/users', data);
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.post<BackendApiResponse<any>>('/admin/users', data);
+    return mapUser(response.data.data);
   }
 
   async updateUser(id: string, data: Partial<User>): Promise<User> {
-    try {
-      // Mock API call
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.put<User>(`/admin/users/${id}`, data);
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.put<BackendApiResponse<any>>(`/admin/users/${id}`, data);
+    return mapUser(response.data.data);
   }
 
   async deleteUser(id: string): Promise<void> {
-    try {
-      // Mock API call
-      // Real API call (uncomment when backend is ready):
-      // await apiClient.delete(`/admin/users/${id}`);
-    } catch (error) {
-      throw error;
-    }
+    await apiClient.delete(`/admin/users/${id}`);
+  }
+
+  async getDashboard() {
+    const response = await apiClient.get<BackendApiResponse<any>>('/admin/dashboard');
+    return response.data.data;
+  }
+
+  async getStores(filters?: any): Promise<PaginatedResponse<Store>> {
+    const response = await apiClient.get<BackendPaginatedResponse<any>>('/admin/stores', {
+      params: filters,
+    });
+    const { data, pagination } = response.data;
+    return {
+      data: data.map(mapStore),
+      total: pagination.total,
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+    };
+  }
+
+  async getStoreById(id: string): Promise<Store> {
+    const response = await apiClient.get<BackendApiResponse<any>>(`/admin/stores/${id}`);
+    return mapStore(response.data.data);
+  }
+
+  async addStore(data: any): Promise<Store> {
+    const response = await apiClient.post<BackendApiResponse<any>>('/admin/stores', data);
+    return mapStore(response.data.data);
+  }
+
+  async updateStore(id: string, data: Partial<Store>): Promise<Store> {
+    const response = await apiClient.put<BackendApiResponse<any>>(`/admin/stores/${id}`, data);
+    return mapStore(response.data.data);
+  }
+
+  async deleteStore(id: string): Promise<void> {
+    await apiClient.delete(`/admin/stores/${id}`);
   }
 }
 

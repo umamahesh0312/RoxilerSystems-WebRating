@@ -1,9 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
-import { storeService, ratingService } from '@services/index';
+import { storeService, ratingService, userService } from '@services/index';
 import { ResponseHandler, logger } from '@utils/index';
-import { CreateRatingDTO, UpdateRatingDTO, StoreFilterDTO } from '@types/dto';
+import { CreateRatingDTO, UpdateRatingDTO, StoreFilterDTO } from '../types/dto';
 
 export class UserController {
+  // Get current user profile
+  async getProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return ResponseHandler.error(res, 'User not authenticated', 401);
+      }
+      const user = await userService.getUserById(userId);
+      if (!user) {
+        return ResponseHandler.error(res, 'User not found', 404);
+      }
+      return ResponseHandler.success(res, user, 'Profile retrieved successfully');
+    } catch (error) {
+      logger.error('Get profile controller error', error);
+      next(error);
+    }
+  }
+
   // Get all stores with user ratings
   async getStores(req: Request, res: Response, next: NextFunction) {
     try {
@@ -97,6 +115,29 @@ export class UserController {
       return ResponseHandler.paginated(res, data, page, pageSize, total, 'User ratings retrieved successfully');
     } catch (error) {
       logger.error('Get user ratings controller error', error);
+      next(error);
+    }
+  }
+
+  // Get dashboard stats for the current user
+  async getUserDashboard(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return ResponseHandler.error(res, 'User not authenticated', 401);
+      }
+
+      const [storeData, ratingData] = await Promise.all([
+        storeService.getStoreCount(),
+        ratingService.getRatingCount(),
+      ]);
+
+      return ResponseHandler.success(res, {
+        totalStores: storeData,
+        totalRatings: ratingData,
+      }, 'Dashboard data retrieved');
+    } catch (error) {
+      logger.error('Get user dashboard controller error', error);
       next(error);
     }
   }

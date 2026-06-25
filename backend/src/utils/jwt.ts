@@ -1,34 +1,43 @@
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import { config } from '@config/env';
-import { IJwtPayload, UserRole } from '@types/index';
+import { IJwtPayload, UserRole } from '../types';
 
 export class JwtUtils {
-  static generateToken(userId: string, email: string, role: UserRole): string {
-    const payload: IJwtPayload = {
+  static generateToken(
+    userId: string,
+    email: string,
+    role: UserRole
+  ): string {
+    const payload = {
       id: userId,
       email,
       role,
     };
 
-    return jwt.sign(payload, config.jwt.secret, {
-      expiresIn: config.jwt.expiration,
-    });
+    const secret: Secret = config.jwt.secret;
+
+    const options: SignOptions = {
+      expiresIn: '7d',
+    };
+
+    return jwt.sign(payload, secret, options);
   }
 
   static verifyToken(token: string): IJwtPayload {
     try {
-      const decoded = jwt.verify(token, config.jwt.secret) as IJwtPayload;
-      return decoded;
-    } catch (error) {
+      return jwt.verify(
+        token,
+        config.jwt.secret as Secret
+      ) as IJwtPayload;
+    } catch {
       throw new Error('Invalid or expired token');
     }
   }
 
   static decodeToken(token: string): IJwtPayload | null {
     try {
-      const decoded = jwt.decode(token) as IJwtPayload;
-      return decoded;
-    } catch (error) {
+      return jwt.decode(token) as IJwtPayload;
+    } catch {
       return null;
     }
   }

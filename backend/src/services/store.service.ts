@@ -1,7 +1,7 @@
 import { storeRepository, ratingRepository } from '@repositories/index';
 import { logger } from '@utils/index';
-import { IStore, IStoreWithUserRating } from '@types/index';
-import { CreateStoreDTO, UpdateStoreDTO, StoreFilterDTO } from '@types/dto';
+import { IStore, IStoreWithUserRating } from '../types';
+import { CreateStoreDTO, UpdateStoreDTO, StoreFilterDTO } from '../types/dto';
 
 export class StoreService {
   async createStore(data: CreateStoreDTO): Promise<IStore> {

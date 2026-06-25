@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { userService, storeService, ratingService } from '@services/index';
 import { ResponseHandler, logger } from '@utils/index';
-import { CreateUserDTO, UpdateUserDTO, UserFilterDTO } from '@types/dto';
+import { CreateUserDTO, UpdateUserDTO, UserFilterDTO } from '../types/dto';
 
 export class AdminController {
   // Dashboard

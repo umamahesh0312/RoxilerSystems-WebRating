@@ -1,11 +1,24 @@
 import apiClient from './apiClient';
 import { Rating, PaginatedResponse } from '@/types';
-import { MOCK_RATINGS } from '@/constants/mockData';
+import { BackendApiResponse, BackendPaginatedResponse } from './authService';
 
 interface RatingSubmitData {
   storeId: string;
-  userId: string;
   score: number;
+}
+
+function mapRating(backendRating: any): Rating {
+  return {
+    id: backendRating.id,
+    storeId: backendRating.storeId || '',
+    userId: backendRating.userId || '',
+    score: backendRating.rating ?? backendRating.score ?? 0,
+    createdAt: backendRating.createdAt,
+    updatedAt: backendRating.updatedAt,
+    userName: backendRating.user?.name || backendRating.userName,
+    userEmail: backendRating.user?.email || backendRating.userEmail,
+    storeName: backendRating.store?.name || backendRating.storeName,
+  };
 }
 
 class RatingService {
@@ -14,30 +27,19 @@ class RatingService {
     page: number = 1,
     pageSize: number = 10
   ): Promise<PaginatedResponse<Rating>> {
-    try {
-      // Mock API call
-      const storeRatings = MOCK_RATINGS.filter(rating => rating.storeId === storeId);
-
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-
-      return {
-        data: storeRatings.slice(start, end),
-        total: storeRatings.length,
-        page,
-        pageSize,
-        totalPages: Math.ceil(storeRatings.length / pageSize),
-      };
-
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.get<PaginatedResponse<Rating>>(
-      //   `/ratings/store/${storeId}`,
-      //   { params: { page, pageSize } }
-      // );
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    // Backend returns via owner route — use the admin/store endpoint for direct access
+    const response = await apiClient.get<BackendPaginatedResponse<any>>(
+      `/owner/ratings`,
+      { params: { storeId, page, pageSize } }
+    );
+    const { data, pagination } = response.data;
+    return {
+      data: data.map(mapRating),
+      total: pagination.total,
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+    };
   }
 
   async getRatingsByUser(
@@ -45,85 +47,45 @@ class RatingService {
     page: number = 1,
     pageSize: number = 10
   ): Promise<PaginatedResponse<Rating>> {
-    try {
-      // Mock API call
-      const userRatings = MOCK_RATINGS.filter(rating => rating.userId === userId);
-
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-
-      return {
-        data: userRatings.slice(start, end),
-        total: userRatings.length,
-        page,
-        pageSize,
-        totalPages: Math.ceil(userRatings.length / pageSize),
-      };
-
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.get<PaginatedResponse<Rating>>(
-      //   `/ratings/user/${userId}`,
-      //   { params: { page, pageSize } }
-      // );
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.get<BackendPaginatedResponse<any>>(
+      '/user/ratings',
+      { params: { page, pageSize } }
+    );
+    const { data, pagination } = response.data;
+    return {
+      data: data.map(mapRating),
+      total: pagination.total,
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+    };
   }
 
   async submitRating(data: RatingSubmitData): Promise<Rating> {
-    try {
-      // Mock API call
-      const newRating: Rating = {
-        id: String(MOCK_RATINGS.length + 1),
-        ...data,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      return newRating;
-
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.post<Rating>('/ratings', data);
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await apiClient.post<BackendApiResponse<any>>('/ratings', {
+      storeId: data.storeId,
+      rating: data.score,
+    });
+    return mapRating(response.data.data);
   }
 
-  async updateRating(id: string, score: number): Promise<Rating> {
-    try {
-      // Mock API call
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.put<Rating>(`/ratings/${id}`, { score });
-      // return response.data;
-    } catch (error) {
-      throw error;
-    }
+  async updateRating(storeId: string, score: number): Promise<Rating> {
+    const response = await apiClient.put<BackendApiResponse<any>>(`/ratings/${storeId}`, {
+      rating: score,
+    });
+    return mapRating(response.data.data);
   }
 
-  async deleteRating(id: string): Promise<void> {
-    try {
-      // Mock API call
-      // Real API call (uncomment when backend is ready):
-      // await apiClient.delete(`/ratings/${id}`);
-    } catch (error) {
-      throw error;
-    }
+  async deleteRating(storeId: string): Promise<void> {
+    await apiClient.delete(`/ratings/${storeId}`);
   }
 
   async getUserRatingForStore(userId: string, storeId: string): Promise<Rating | null> {
     try {
-      // Mock API call
-      const rating = MOCK_RATINGS.find(r => r.userId === userId && r.storeId === storeId);
-      return rating || null;
-
-      // Real API call (uncomment when backend is ready):
-      // const response = await apiClient.get<Rating | null>(
-      //   `/ratings/user/${userId}/store/${storeId}`
-      // );
-      // return response.data;
-    } catch (error) {
-      throw error;
+      const response = await apiClient.get<BackendApiResponse<any>>(`/ratings/${storeId}`);
+      return response.data.data ? mapRating(response.data.data) : null;
+    } catch {
+      return null;
     }
   }
 }

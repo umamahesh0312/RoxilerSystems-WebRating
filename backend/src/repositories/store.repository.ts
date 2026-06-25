@@ -1,5 +1,5 @@
 import prisma from '@config/database';
-import { IStore } from '@types/index';
+import { IStore } from '../types';
 import { Prisma } from '@prisma/client';
 
 export class StoreRepository {

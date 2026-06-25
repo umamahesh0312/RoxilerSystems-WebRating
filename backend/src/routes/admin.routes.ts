@@ -8,7 +8,7 @@ import {
   updateStoreSchema,
   filterSchema,
 } from '@validators/index';
-import { UserRole } from '@types/index';
+import { UserRole } from '../types';
 
 const router = Router();
 

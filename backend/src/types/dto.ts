@@ -1,3 +1,5 @@
+import { UserRole } from './index';
+
 export interface RegisterDTO {
   name: string;
   email: string;
@@ -20,14 +22,14 @@ export interface CreateUserDTO {
   email: string;
   password: string;
   address?: string;
-  role?: string;
+  role?: UserRole;
 }
 
 export interface UpdateUserDTO {
   name?: string;
   email?: string;
   address?: string;
-  role?: string;
+  role?: UserRole;
 }
 
 export interface CreateStoreDTO {

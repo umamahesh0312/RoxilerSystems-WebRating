@@ -1,7 +1,8 @@
 import { ratingRepository, storeRepository } from '@repositories/index';
+import { RatingWithUser } from '@repositories/rating.repository';
 import { logger } from '@utils/index';
-import { IRating } from '@types/index';
-import { CreateRatingDTO, UpdateRatingDTO } from '@types/dto';
+import { IRating } from '../types';
+import { CreateRatingDTO, UpdateRatingDTO } from '../types/dto';
 import { storeService } from './store.service';
 
 export class RatingService {
@@ -41,7 +42,7 @@ export class RatingService {
     }
   }
 
-  async getRatingsByStore(storeId: string, page: number = 1, pageSize: number = 10) {
+  async getRatingsByStore(storeId: string, page: number = 1, pageSize: number = 10): Promise<{ data: RatingWithUser[]; total: number }> {
     try {
       return await ratingRepository.findByStoreId(storeId, page, pageSize);
     } catch (error) {
@@ -50,7 +51,7 @@ export class RatingService {
     }
   }
 
-  async getRatingsByUser(userId: string, page: number = 1, pageSize: number = 10) {
+  async getRatingsByUser(userId: string, page: number = 1, pageSize: number = 10): Promise<{ data: IRating[]; total: number }> {
     try {
       return await ratingRepository.findByUserId(userId, page, pageSize);
     } catch (error) {

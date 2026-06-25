@@ -1,8 +1,8 @@
 import prisma from '@config/database';
-import { IRating } from '@types/index';
-import { Prisma } from '@prisma/client';
+import { IRating } from '../types';
+// import { Prisma } from '@prisma/client';
 
-interface RatingWithUser extends IRating {
+export interface RatingWithUser extends IRating {
   user: {
     name: string;
     email: string;

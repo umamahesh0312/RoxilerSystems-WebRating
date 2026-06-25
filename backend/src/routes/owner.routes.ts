@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ownerController } from '@controllers/index';
 import { authMiddleware, authorize } from '@middleware/index';
-import { UserRole } from '@types/index';
+import { UserRole } from '../types';
 
 const router = Router();
 
