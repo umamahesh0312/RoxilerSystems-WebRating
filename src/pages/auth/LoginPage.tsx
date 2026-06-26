@@ -40,8 +40,14 @@ export const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError('');
-      await login(data.email, data.password);
-      navigate('/admin/dashboard', { replace: true });
+      const authUser = await login(data.email, data.password);
+      const redirectPath =
+        authUser.role === 'SYSTEM_ADMIN'
+          ? '/admin/dashboard'
+          : authUser.role === 'STORE_OWNER'
+          ? '/owner/dashboard'
+          : '/user/dashboard';
+      navigate(redirectPath, { replace: true });
     } catch (err) {
       setError((err as Error).message || 'Login failed');
     }

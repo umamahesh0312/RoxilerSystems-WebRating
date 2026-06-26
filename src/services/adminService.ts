@@ -61,7 +61,13 @@ class AdminService {
   }
 
   async addStore(data: any): Promise<Store> {
-    const response = await apiClient.post<BackendApiResponse<any>>('/admin/stores', data);
+    const payload = {
+      name: data.storeName,
+      email: data.email,
+      address: data.address,
+      storeOwnerId: data.storeOwnerId,
+    };
+    const response = await apiClient.post<BackendApiResponse<any>>('/admin/stores', payload);
     return mapStore(response.data.data);
   }
 

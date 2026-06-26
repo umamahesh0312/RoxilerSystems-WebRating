@@ -65,6 +65,7 @@ export interface UserFilterDTO {
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  role?: UserRole;
 }
 
 export interface StoreFilterDTO {
@@ -73,4 +74,5 @@ export interface StoreFilterDTO {
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  ownerId?: string;
 }

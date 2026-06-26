@@ -16,7 +16,6 @@ import { DataTable, Column } from '@/components/DataTable';
 import { RatingStars } from '@/components/RatingStars';
 import storeService from '@/services/storeService';
 import ratingService from '@/services/ratingService';
-import { MOCK_RATINGS } from '@/constants/mockData';
 
 export const AdminStoreDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,9 +34,9 @@ export const AdminStoreDetailsPage: React.FC = () => {
         const storeData = await storeService.getStoreById(id);
         setStore(storeData);
 
-        // Get ratings for this store
-        const storeRatings = MOCK_RATINGS.filter(r => r.storeId === id);
-        setRatings(storeRatings);
+        // Get ratings for this store from backend
+        const ratingResponse = await ratingService.getRatingsByStore(id);
+        setRatings(ratingResponse.data);
       }
     } catch (error) {
       console.error('Failed to load store:', error);

@@ -121,6 +121,15 @@ export class RatingService {
       throw error;
     }
   }
+
+  async getRatingCountByUser(userId: string): Promise<number> {
+    try {
+      return await ratingRepository.countByUserId(userId);
+    } catch (error) {
+      logger.error('Get rating count by user error', error);
+      throw error;
+    }
+  }
 }
 
 export const ratingService = new RatingService();

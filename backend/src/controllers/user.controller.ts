@@ -129,7 +129,7 @@ export class UserController {
 
       const [storeData, ratingData] = await Promise.all([
         storeService.getStoreCount(),
-        ratingService.getRatingCount(),
+        ratingService.getRatingCountByUser(userId),
       ]);
 
       return ResponseHandler.success(res, {

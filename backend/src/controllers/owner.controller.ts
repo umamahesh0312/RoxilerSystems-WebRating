@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { storeService, ratingService } from '@services/index';
 import { ResponseHandler, logger } from '@utils/index';
+import { UserRole } from '../types';
 
 export class OwnerController {
   // Get store owner dashboard
@@ -84,7 +85,7 @@ export class OwnerController {
 
       // Verify the store belongs to the owner
       const store = await storeService.getStoreById(storeId);
-      if (!store || store.ownerId !== ownerId) {
+      if (!store || (req.user?.role !== UserRole.ADMIN && store.ownerId !== ownerId)) {
         return ResponseHandler.error(res, 'Store not found or unauthorized', 404);
       }
 

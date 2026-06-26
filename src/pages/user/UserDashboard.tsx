@@ -12,7 +12,7 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import { UserLayout } from '@/layouts/UserLayout';
 import { useAuth } from '@/hooks/useAuth';
-import { MOCK_STORES, MOCK_RATINGS } from '@/constants/mockData';
+import userService from '@/services/userService';
 
 const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; color: string }> = ({
   title,
@@ -45,10 +45,18 @@ export const UserDashboard: React.FC = () => {
   const [submittedRatings, setSubmittedRatings] = useState(0);
 
   useEffect(() => {
-    setTotalStores(MOCK_STORES.length);
-    const userRatings = MOCK_RATINGS.filter(r => r.userId === user?.id);
-    setSubmittedRatings(userRatings.length);
-  }, [user?.id]);
+    const loadDashboard = async () => {
+      try {
+        const dashboard = await userService.getDashboard();
+        setTotalStores(dashboard.totalStores);
+        setSubmittedRatings(dashboard.totalRatings);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+
+    loadDashboard();
+  }, []);
 
   return (
     <UserLayout>

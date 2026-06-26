@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Auth Validators
 export const registerSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters').max(60, 'Name must not exceed 60 characters'),
+  name: z.string().min(20, 'Name must be at least 20 characters').max(60, 'Name must not exceed 60 characters'),
   email: z.string().email('Invalid email format'),
   password: z
     .string()
@@ -30,7 +30,7 @@ export const changePasswordSchema = z.object({
 
 // User Validators
 export const createUserSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters').max(60, 'Name must not exceed 60 characters'),
+  name: z.string().min(20, 'Name must be at least 20 characters').max(60, 'Name must not exceed 60 characters'),
   email: z.string().email('Invalid email format'),
   password: z
     .string()
@@ -43,7 +43,7 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters').max(60, 'Name must not exceed 60 characters').optional(),
+  name: z.string().min(20, 'Name must be at least 20 characters').max(60, 'Name must not exceed 60 characters').optional(),
   email: z.string().email('Invalid email format').optional(),
   address: z.string().max(400, 'Address must not exceed 400 characters').optional(),
   role: z.enum(['ADMIN', 'STORE_OWNER', 'NORMAL_USER']).optional(),
@@ -85,4 +85,6 @@ export const filterSchema = z.object({
   search: z.string().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).default('asc'),
+  role: z.enum(['ADMIN', 'STORE_OWNER', 'NORMAL_USER']).optional(),
+  ownerId: z.string().uuid('Invalid owner ID').optional(),
 });

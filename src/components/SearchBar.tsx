@@ -1,15 +1,12 @@
 import React from 'react';
-import {
-  TextField,
-  InputAdornment,
-  TextFieldProps,
-} from '@mui/material';
+import { TextField, InputAdornment } from '@mui/material';
+import type { ComponentProps } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 
-interface SearchBarProps extends TextFieldProps {
+type SearchBarProps = Omit<ComponentProps<typeof TextField>, 'onChange'> & {
   onSearch?: (value: string) => void;
   placeholder?: string;
-}
+};
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,

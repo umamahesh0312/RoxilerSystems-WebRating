@@ -9,7 +9,7 @@ export const loginSchema = z.object({
 export const signupSchema = z.object({
   name: z
     .string()
-    .min(2, 'Name must be at least 2 characters')
+    .min(20, 'Name must be at least 20 characters')
     .max(60, 'Name must be at most 60 characters'),
   email: z.string().email('Invalid email address'),
   address: z.string().max(400, 'Address must be at most 400 characters').optional(),
@@ -40,7 +40,7 @@ export const changePasswordSchema = z
 export const addUserSchema = z.object({
   name: z
     .string()
-    .min(2, 'Name must be at least 2 characters')
+    .min(20, 'Name must be at least 20 characters')
     .max(60, 'Name must be at most 60 characters'),
   email: z.string().email('Invalid email address'),
   address: z.string().max(400, 'Address must be at most 400 characters').optional(),

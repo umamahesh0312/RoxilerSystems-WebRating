@@ -122,6 +122,10 @@ export class RatingRepository {
   async count(): Promise<number> {
     return prisma.rating.count();
   }
+
+  async countByUserId(userId: string): Promise<number> {
+    return prisma.rating.count({ where: { userId } });
+  }
 }
 
 export const ratingRepository = new RatingRepository();

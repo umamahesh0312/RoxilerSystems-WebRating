@@ -1,6 +1,6 @@
 import { userRepository } from '@repositories/index';
 import { PasswordUtils, logger } from '@utils/index';
-import { IUser } from '../types';
+import { IUser, UserRole } from '../types';
 import { CreateUserDTO, UpdateUserDTO, UserFilterDTO } from '../types/dto';
 
 export class UserService {
@@ -20,7 +20,7 @@ export class UserService {
         email: data.email,
         password: hashedPassword,
         address: data.address,
-        role: data.role || 'NORMAL_USER',
+        role: data.role || UserRole.NORMAL_USER,
       });
 
       logger.info(`User created: ${user.email}`);
@@ -48,8 +48,9 @@ export class UserService {
       const search = filters.search;
       const sortBy = filters.sortBy || 'createdAt';
       const sortOrder = filters.sortOrder || 'asc';
+      const role = filters.role;
 
-      return await userRepository.findAll(page, pageSize, search, sortBy, sortOrder);
+      return await userRepository.findAll(page, pageSize, search, sortBy, sortOrder, role);
     } catch (error) {
       logger.error('Get users error', error);
       throw error;

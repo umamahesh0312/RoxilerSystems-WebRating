@@ -1,5 +1,5 @@
 import prisma from '@config/database';
-import { IUser } from '../types';
+import { IUser, UserRole } from '../types';
 import { Prisma } from '@prisma/client';
 
 export class UserRepository {
@@ -20,7 +20,7 @@ export class UserRepository {
     email: string;
     password: string;
     address?: string;
-    role?: string;
+    role?: UserRole;
   }): Promise<IUser> {
     return prisma.user.create({
       data: {
@@ -28,7 +28,7 @@ export class UserRepository {
         email: data.email,
         password: data.password,
         address: data.address,
-        role: (data.role as any) || 'NORMAL_USER',
+        role: data.role || 'NORMAL_USER',
       },
     }) as Promise<IUser>;
   }
@@ -56,15 +56,27 @@ export class UserRepository {
     pageSize: number = 10,
     search?: string,
     sortBy: string = 'createdAt',
-    sortOrder: 'asc' | 'desc' = 'asc'
+    sortOrder: 'asc' | 'desc' = 'asc',
+    role?: UserRole
   ): Promise<{ data: IUser[]; total: number }> {
     const skip = (page - 1) * pageSize;
 
-    const where: Prisma.UserWhereInput = search
+    const searchFilter: Prisma.UserWhereInput = search
       ? {
-          OR: [{ name: { contains: search } }, { email: { contains: search } }],
+          OR: [
+            { name: { contains: search } },
+            { email: { contains: search } },
+            { address: { contains: search } },
+          ],
         }
       : {};
+
+    const roleFilter: Prisma.UserWhereInput = role ? { role } : {};
+
+    const where: Prisma.UserWhereInput = {
+      ...searchFilter,
+      ...roleFilter,
+    };
 
     const [data, total] = await Promise.all([
       prisma.user.findMany({

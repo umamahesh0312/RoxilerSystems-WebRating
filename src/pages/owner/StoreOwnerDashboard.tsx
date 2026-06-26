@@ -12,10 +12,10 @@ import RateReviewIcon from '@mui/icons-material/RateReview';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { UserLayout } from '@/layouts/UserLayout';
 import { useAuth } from '@/hooks/useAuth';
-import { MOCK_STORES, MOCK_RATINGS } from '@/constants/mockData';
 import { DataTable, Column } from '@/components/DataTable';
-import { Rating } from '@/types';
+import { Rating, Store } from '@/types';
 import { RatingStars } from '@/components/RatingStars';
+import ownerService from '@/services/ownerService';
 
 const StatCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; color: string }> = ({
   title,
@@ -43,28 +43,44 @@ const StatCard: React.FC<{ title: string; value: string | number; icon: React.Re
 );
 
 export const StoreOwnerDashboard: React.FC = () => {
-  const { user } = useAuth();
-  const [stores, setStores] = useState(MOCK_STORES.filter(s => s.ownerId === user?.id));
+  const [stores, setStores] = useState<Store[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [averageRating, setAverageRating] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
+  const [storeCount, setStoreCount] = useState(0);
 
   useEffect(() => {
-    if (user) {
-      // Get ratings for this owner's stores
-      const storeIds = stores.map(s => s.id);
-      const storeRatings = MOCK_RATINGS.filter(r => storeIds.includes(r.storeId));
-      setRatings(storeRatings);
-      setTotalRatings(storeRatings.length);
+    const loadOwnerData = async () => {
+      try {
+        const dashboard = await ownerService.getDashboard();
+        setAverageRating(dashboard.averageRating);
+        setTotalRatings(dashboard.totalRatings);
+        setStoreCount(dashboard.storeCount);
 
-      if (storeRatings.length > 0) {
-        const avg = storeRatings.reduce((sum, r) => sum + r.score, 0) / storeRatings.length;
-        setAverageRating(parseFloat(avg.toFixed(2)));
+        const storesData = await ownerService.getStores();
+        setStores(storesData);
+
+        const ratingsByStore = await Promise.all(
+          storesData.map(async (store) => {
+            const response = await ownerService.getRatings(store.id);
+            return response.data.map((rating) => ({
+              ...rating,
+              storeName: store.storeName,
+            }));
+          })
+        );
+
+        setRatings(ratingsByStore.flat());
+      } catch (error) {
+        console.error('Failed to load owner dashboard data:', error);
       }
-    }
-  }, [user, stores]);
+    };
+
+    loadOwnerData();
+  }, []);
 
   const columns: Column<Rating>[] = [
+    { id: 'storeName', label: 'Store' },
     { id: 'userName', label: 'User Name' },
     { id: 'userEmail', label: 'User Email' },
     {

@@ -19,10 +19,8 @@ import {
 import { addStoreSchema } from '@/utils/validation';
 import adminService from '@/services/adminService';
 import storeService from '@/services/storeService';
-import { AddStoreFormData, User } from '@/types';
+import { AddStoreFormData, User, UserRole } from '@/types';
 import { AdminLayout } from '@/layouts/AdminLayout';
-import { MOCK_USERS } from '@/constants/mockData';
-import { UserRole } from '@/types';
 
 export const AdminAddStorePage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,9 +29,16 @@ export const AdminAddStorePage: React.FC = () => {
   const [storeOwners, setStoreOwners] = useState<User[]>([]);
 
   useEffect(() => {
-    // Get store owners
-    const owners = MOCK_USERS.filter(u => u.role === UserRole.STORE_OWNER);
-    setStoreOwners(owners);
+    const loadStoreOwners = async () => {
+      try {
+        const response = await adminService.getUsers({ page: 1, pageSize: 100, role: UserRole.STORE_OWNER });
+        setStoreOwners(response.data);
+      } catch (err) {
+        console.error('Failed to load store owners:', err);
+      }
+    };
+
+    loadStoreOwners();
   }, []);
 
   const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<AddStoreFormData>({

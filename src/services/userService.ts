@@ -1,15 +1,30 @@
 import apiClient from './apiClient';
-import { User, ChangePasswordFormData } from '@/types';
-import { mapUser, BackendApiResponse } from './authService';
+import { User, ChangePasswordFormData, PaginatedResponse } from '@/types';
+import { mapUser, BackendApiResponse, BackendPaginatedResponse } from './authService';
 
 class UserService {
   async getUserProfile(): Promise<User> {
-    // Backend doesn't have a dedicated profile endpoint; use the auth context
-    throw new Error('Profile not available');
+    const response = await apiClient.get<BackendApiResponse<any>>('/user/profile');
+    return mapUser(response.data.data);
   }
 
-  async updateProfile(data: Partial<User>): Promise<User> {
-    throw new Error('Profile update endpoint not available');
+  async getDashboard(): Promise<{ totalStores: number; totalRatings: number }> {
+    const response = await apiClient.get<BackendApiResponse<any>>('/user/dashboard');
+    return response.data.data;
+  }
+
+  async getUserRatings(page: number = 1, pageSize: number = 10): Promise<PaginatedResponse<any>> {
+    const response = await apiClient.get<BackendPaginatedResponse<any>>('/user/ratings', {
+      params: { page, pageSize },
+    });
+    const { data, pagination } = response.data;
+    return {
+      data,
+      total: pagination.total,
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      totalPages: pagination.totalPages,
+    };
   }
 
   async changePassword(data: ChangePasswordFormData): Promise<void> {

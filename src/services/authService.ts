@@ -86,6 +86,7 @@ function mapStore(backendStore: any) {
     ownerId: backendStore.ownerId || '',
     averageRating: backendStore.averageRating || 0,
     totalRatings: backendStore.totalRatings || 0,
+    userRating: backendStore.userRating ?? null,
     createdAt: backendStore.createdAt,
     updatedAt: backendStore.updatedAt,
   };

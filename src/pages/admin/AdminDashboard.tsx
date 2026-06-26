@@ -12,10 +12,8 @@ import PeopleIcon from '@mui/icons-material/People';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { AdminLayout } from '@/layouts/AdminLayout';
-import { MOCK_USERS, MOCK_STORES, MOCK_RATINGS } from '@/constants/mockData';
-import { UserRole } from '@/types';
+import adminService from '@/services/adminService';
 
 const COLORS = ['#2563eb', '#7c3aed', '#10b981', '#f59e0b', '#ef4444'];
 
@@ -44,42 +42,32 @@ const StatCard: React.FC<{ title: string; value: string | number; icon: React.Re
   </Card>
 );
 
+type RatingsOverviewData = { name: string; count: number };
+type UserDistributionData = { name: string; value: number };
+
 export const AdminDashboard: React.FC = () => {
-  const [ratingsOverviewData, setRatingsOverviewData] = useState([]);
-  const [userDistributionData, setUserDistributionData] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalStores, setTotalStores] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
 
-  useEffect(() => {
-    // Calculate ratings overview
-    const ratingCounts = [0, 0, 0, 0, 0];
-    MOCK_RATINGS.forEach(rating => {
-      ratingCounts[rating.score - 1]++;
-    });
+useEffect(() => {
+  const loadDashboard = async () => {
+    try {
+      const dashboard = await adminService.getDashboard();
+      setTotalUsers(dashboard.totalUsers);
+      setTotalStores(dashboard.totalStores);
+      setTotalRatings(dashboard.totalRatings);
+      if (dashboard.averageRating !== undefined) {
+        setAverageRating(dashboard.averageRating);
+      }
+    } catch (error) {
+      console.error('Failed to load admin dashboard:', error);
+    }
+  };
 
-    setRatingsOverviewData(
-      ratingCounts.map((count, index) => ({
-        name: `${index + 1} Star`,
-        count,
-      }))
-    );
-
-    // Calculate user distribution
-    const userDistribution: { [key: string]: number } = {};
-    MOCK_USERS.forEach(user => {
-      userDistribution[user.role] = (userDistribution[user.role] || 0) + 1;
-    });
-
-    setUserDistributionData(
-      Object.entries(userDistribution).map(([role, count]) => ({
-        name: role,
-        value: count,
-      }))
-    );
-  }, []);
-
-  const totalUsers = MOCK_USERS.length;
-  const totalStores = MOCK_STORES.length;
-  const totalRatings = MOCK_RATINGS.length;
-  const averageRating = (MOCK_RATINGS.reduce((sum, r) => sum + r.score, 0) / MOCK_RATINGS.length).toFixed(1);
+  loadDashboard();
+}, []);
 
   return (
     <AdminLayout>
@@ -124,52 +112,6 @@ export const AdminDashboard: React.FC = () => {
           </Grid>
         </Grid>
 
-        {/* Charts */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Ratings Overview
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={ratingsOverviewData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                User Distribution
-              </Typography>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={userDistributionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {userDistributionData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </Paper>
-          </Grid>
-        </Grid>
       </Container>
     </AdminLayout>
   );

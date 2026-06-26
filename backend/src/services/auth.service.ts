@@ -21,7 +21,7 @@ export class AuthService {
         email: data.email,
         password: hashedPassword,
         address: data.address,
-        role: 'NORMAL_USER',
+        role: UserRole.NORMAL_USER,
       });
 
       // Generate token

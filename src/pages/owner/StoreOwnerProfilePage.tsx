@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -21,10 +21,10 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { changePasswordSchema } from '@/utils/validation';
 import { useAuth } from '@/hooks/useAuth';
-import { ChangePasswordFormData } from '@/types';
+import { ChangePasswordFormData, Store } from '@/types';
 import { UserLayout } from '@/layouts/UserLayout';
 import authService from '@/services/authService';
-import { MOCK_STORES } from '@/constants/mockData';
+import ownerService from '@/services/ownerService';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -44,11 +44,25 @@ export const StoreOwnerProfilePage: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [userStores, setUserStores] = useState<Store[]>([]);
+  const [avgStoreRating, setAvgStoreRating] = useState('0.00');
 
-  const userStores = MOCK_STORES.filter(s => s.ownerId === user?.id);
-  const avgStoreRating = userStores.length > 0
-    ? (userStores.reduce((sum, s) => sum + s.averageRating, 0) / userStores.length).toFixed(2)
-    : '0.00';
+  useEffect(() => {
+    const loadOwnerStores = async () => {
+      try {
+        const stores = await ownerService.getStores();
+        setUserStores(stores);
+        const avg = stores.length > 0
+          ? stores.reduce((sum, store) => sum + store.averageRating, 0) / stores.length
+          : 0;
+        setAvgStoreRating(avg.toFixed(2));
+      } catch (error) {
+        console.error('Failed to load owner stores:', error);
+      }
+    };
+
+    loadOwnerStores();
+  }, []);
 
   const { control, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),

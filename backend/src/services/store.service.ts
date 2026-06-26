@@ -38,8 +38,9 @@ export class StoreService {
       const search = filters.search;
       const sortBy = filters.sortBy || 'createdAt';
       const sortOrder = filters.sortOrder || 'asc';
+      const ownerId = filters.ownerId;
 
-      return await storeRepository.findAll(page, pageSize, search, sortBy, sortOrder);
+      return await storeRepository.findAll(page, pageSize, search, sortBy, sortOrder, ownerId);
     } catch (error) {
       logger.error('Get stores error', error);
       throw error;

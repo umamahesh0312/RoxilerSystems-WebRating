@@ -23,6 +23,7 @@ export interface Store {
   ownerId: string;
   averageRating: number;
   totalRatings: number;
+  userRating?: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -49,7 +50,7 @@ export interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   signup: (data: SignupFormData) => Promise<void>;
   logout: () => void;
 }
@@ -143,6 +144,7 @@ export interface StoreFilterOptions {
   maxRating?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  ownerId?: string;
   page?: number;
   pageSize?: number;
 }

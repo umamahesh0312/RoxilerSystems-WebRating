@@ -20,16 +20,12 @@ import { RatingStars } from '@/components/RatingStars';
 import { PaginationComponent } from '@/components/PaginationComponent';
 import storeService from '@/services/storeService';
 import ratingService from '@/services/ratingService';
-import { Store, Rating } from '@/types';
+import { Store } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
-
-interface StoreWithUserRating extends Store {
-  userRating?: Rating;
-}
 
 export const UserStoresPage: React.FC = () => {
   const { user } = useAuth();
-  const [stores, setStores] = useState<StoreWithUserRating[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -44,24 +40,13 @@ export const UserStoresPage: React.FC = () => {
   const loadStores = async () => {
     try {
       setLoading(true);
-      const response = await storeService.getStores({
+      const response = await storeService.getStoresForUser({
         search,
         page: currentPage,
         pageSize: 6,
       });
 
-      // Load user ratings for each store
-      if (user) {
-        const storesWithRatings = await Promise.all(
-          response.data.map(async (store) => {
-            const userRating = await ratingService.getUserRatingForStore(user.id, store.id);
-            return { ...store, userRating };
-          })
-        );
-        setStores(storesWithRatings);
-      } else {
-        setStores(response.data);
-      }
+      setStores(response.data);
       setTotalPages(response.totalPages);
     } catch (error) {
       console.error('Failed to load stores:', error);
@@ -82,11 +67,14 @@ export const UserStoresPage: React.FC = () => {
     if (ratingModal.storeId && ratingModal.score && user) {
       try {
         setSubmittingRating(true);
-        await ratingService.submitRating({
-          storeId: ratingModal.storeId,
-          userId: user.id,
-          score: ratingModal.score,
-        });
+        if (stores.find((store) => store.id === ratingModal.storeId)?.userRating) {
+          await ratingService.updateRating(ratingModal.storeId, ratingModal.score);
+        } else {
+          await ratingService.submitRating({
+            storeId: ratingModal.storeId,
+            score: ratingModal.score,
+          });
+        }
         setRatingModal({ open: false });
         loadStores();
       } catch (error) {
@@ -142,12 +130,12 @@ export const UserStoresPage: React.FC = () => {
                         </Typography>
                         <RatingStars value={store.averageRating} readOnly showValue />
                       </Box>
-                      {store.userRating && (
+                      {store.userRating !== null && store.userRating !== undefined && (
                         <Box sx={{ mb: 2, p: 1, backgroundColor: '#f3f4f6', borderRadius: 1 }}>
                           <Typography variant="body2" color="textSecondary" sx={{ mb: 0.5 }}>
                             Your Rating:
                           </Typography>
-                          <RatingStars value={store.userRating.score} readOnly showValue />
+                          <RatingStars value={store.userRating} readOnly showValue />
                         </Box>
                       )}
                       <Button
@@ -155,7 +143,7 @@ export const UserStoresPage: React.FC = () => {
                         variant={store.userRating ? 'outlined' : 'contained'}
                         startIcon={store.userRating ? <EditIcon /> : <AddIcon />}
                         onClick={() =>
-                          handleOpenRatingModal(store.id, store.userRating?.score)
+                          handleOpenRatingModal(store.id, store.userRating ?? undefined)
                         }
                       >
                         {store.userRating ? 'Edit Rating' : 'Submit Rating'}

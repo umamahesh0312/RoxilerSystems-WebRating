@@ -49,11 +49,12 @@ export class StoreRepository {
     pageSize: number = 10,
     search?: string,
     sortBy: string = 'createdAt',
-    sortOrder: 'asc' | 'desc' = 'asc'
+    sortOrder: 'asc' | 'desc' = 'asc',
+    ownerId?: string
   ): Promise<{ data: IStore[]; total: number }> {
     const skip = (page - 1) * pageSize;
 
-    const where: Prisma.StoreWhereInput = search
+    const searchFilter: Prisma.StoreWhereInput = search
       ? {
           OR: [
             { name: { contains: search } },
@@ -62,6 +63,11 @@ export class StoreRepository {
           ],
         }
       : {};
+
+    const where: Prisma.StoreWhereInput = {
+      ...searchFilter,
+      ...(ownerId ? { ownerId } : {}),
+    };
 
     const [data, total] = await Promise.all([
       prisma.store.findMany({

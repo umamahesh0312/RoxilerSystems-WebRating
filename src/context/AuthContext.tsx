@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(response.user);
       storage.setToken(response.token);
       storage.setUser(response.user);
+      return response.user;
     } catch (error) {
       storage.clear();
       throw error;

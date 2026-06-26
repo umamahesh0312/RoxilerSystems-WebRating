@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { userService, storeService, ratingService } from '@services/index';
 import { ResponseHandler, logger } from '@utils/index';
 import { CreateUserDTO, UpdateUserDTO, UserFilterDTO } from '../types/dto';
+import { UserRole } from '../types';
 
 export class AdminController {
   // Dashboard
@@ -47,6 +48,7 @@ export class AdminController {
         search: req.query.search as string,
         sortBy: (req.query.sortBy as string) || 'createdAt',
         sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'asc',
+        role: req.query.role as UserRole,
       };
 
       const { data, total } = await userService.getUsers(filters);
@@ -122,6 +124,7 @@ export class AdminController {
         search: req.query.search as string,
         sortBy: (req.query.sortBy as string) || 'createdAt',
         sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'asc',
+        ownerId: req.query.ownerId as string,
       };
 
       const { data, total } = await storeService.getStores(filters);

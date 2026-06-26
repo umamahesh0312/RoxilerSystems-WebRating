@@ -5,7 +5,6 @@ import { AdminLayout } from '@/layouts/AdminLayout';
 import { User } from '@/types';
 import adminService from '@/services/adminService';
 import storeService from '@/services/storeService';
-import { MOCK_STORES } from '@/constants/mockData';
 
 export const AdminUserDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,9 +25,13 @@ export const AdminUserDetailsPage: React.FC = () => {
 
         // If store owner, get average rating
         if (userData.role === 'STORE_OWNER') {
-          const stores = MOCK_STORES.filter(s => s.ownerId === id);
-          if (stores.length > 0) {
-            const avgRating = stores.reduce((sum, s) => sum + s.averageRating, 0) / stores.length;
+          const response = await storeService.getStores({
+            ownerId: id,
+            page: 1,
+            pageSize: 50,
+          });
+          if (response.data.length > 0) {
+            const avgRating = response.data.reduce((sum, s) => sum + s.averageRating, 0) / response.data.length;
             setStoreRating(avgRating);
           }
         }
