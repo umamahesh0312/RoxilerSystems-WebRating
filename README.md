@@ -203,4 +203,4 @@ npm run build
 
 ## Contact
 
-For support, use the repository issue tracker or contact the development team.
+For support, use the repository issue tracker or contact repository owner.
